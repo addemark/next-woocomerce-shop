@@ -31,6 +31,7 @@ export default function SignInPage() {
       }
 
       setToken(body.token);
+      console.log("id", body.userId);
     } catch (err: any) {
       setError(err.message ?? "Unable to sign in");
     } finally {
@@ -94,7 +95,7 @@ export default function SignInPage() {
 
           {token && (
             <div className="rounded-md bg-green-50 p-3 text-sm text-green-700 break-all">
-              Signed in! Token: {token}
+              Signed in! Token: {token} ---
             </div>
           )}
 
