@@ -61,6 +61,12 @@ export async function POST(request: Request) {
       sameSite: "strict",
       path: "/",
     });
+    (response as any).cookies.set("userId", String(userId), {
+      httpOnly: true,
+      secure: env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+    });
 
     return response;
   } catch (error: any) {

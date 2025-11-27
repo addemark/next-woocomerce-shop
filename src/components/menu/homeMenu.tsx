@@ -1,4 +1,5 @@
 "use client";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   Fragment,
   createContext,
@@ -10,6 +11,7 @@ import logo from "@/public/art-white.svg";
 import Image from "next/image";
 import Link from "next/link";
 import {
+  Button,
   Dialog,
   DialogBackdrop,
   DialogPanel,
@@ -85,49 +87,50 @@ function HomeMenu({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navigation, setNavigation] = useState<Navigation>(baseNavigation);
 
+  const fetchBrands = async () => {
+    const response = await fetch("/api/brands");
+    if (!response.ok) {
+      throw new Error(`Failed to fetch brands: ${response.status}`);
+    }
+    const { data } = await response.json();
+    return data as Brand[];
+  };
+
+  const { data: brands } = useQuery({
+    queryKey: ["brands"],
+    queryFn: fetchBrands,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
   useEffect(() => {
-    const loadBrands = async () => {
-      try {
-        const response = await fetch("/api/brands");
-        if (!response.ok) {
-          throw new Error(`Failed to fetch brands: ${response.status}`);
-        }
+    if (brands) {
+      const brandFeatured = brands.map((brand) => ({
+        name: brand.name,
+        slug: brand.slug,
+        href: `/brand/${brand.slug ?? brand.id}`,
+        imageSrc: brand.image?.src ?? logo.src,
+        imageAlt: brand.image?.alt ?? brand.name,
+        description: brand.description ?? "",
+      }));
 
-        const { data } = await response.json();
-        const brandFeatured =
-          (data as Brand[] | undefined)?.map((brand) => ({
-            name: brand.name,
-            slug: brand.slug,
-            href: `/brand/${brand.slug ?? brand.id}`,
-            imageSrc: brand.image?.src ?? logo.src,
-            imageAlt: brand.image?.alt ?? brand.name,
-            description: brand.description ?? "",
-          })) ?? [];
+      const categoriesGrouped = [
+        {
+          name: "Femei",
+          featured: brandFeatured.filter((item) =>
+            item.slug?.toLowerCase().includes("dama")
+          ),
+        },
+        {
+          name: "Bărbați",
+          featured: brandFeatured.filter((item) =>
+            item.slug?.toLowerCase().includes("barbat")
+          ),
+        },
+      ].filter((category) => category.featured.length > 0);
 
-        // const midpoint = Math.ceil(brandFeatured.length / 2);
-        const categoriesGrouped = [
-          {
-            name: "Femei",
-            featured: brandFeatured.filter((item) =>
-              item.slug?.toLowerCase().includes("dama")
-            ),
-          },
-          {
-            name: "Bărbați",
-            featured: brandFeatured.filter((item) =>
-              item.slug?.toLowerCase().includes("barbat")
-            ),
-          },
-        ].filter((category) => category.featured.length > 0);
-
-        setNavigation((prev) => ({ ...prev, categories: categoriesGrouped }));
-      } catch (error) {
-        console.error("failed to load brands for navigation", error);
-      }
-    };
-
-    loadBrands();
-  }, []);
+      setNavigation((prev) => ({ ...prev, categories: categoriesGrouped }));
+    }
+  }, [brands]);
 
   return (
     <HomeMenuContext.Provider
@@ -359,7 +362,58 @@ HomeMenu.Desktop = function DesktopNavigation() {
 // Navigation Header Subcomponent
 HomeMenu.Header = function NavigationHeader() {
   const { setMobileMenuOpen } = useHomeMenu();
-  console.log(logo);
+  type User = { id: number; name?: string; email?: string; [k: string]: any };
+
+  const [user, setUser] = useState<User | null>(null);
+
+  const fetchUserMe = async () => {
+    const res = await fetch("/api/user/me");
+    if (!res.ok) throw new Error(`Failed to fetch user: ${res.status}`);
+    return res.json();
+  };
+
+  const {
+    data: mePayload,
+    isLoading: userLoading,
+    error: userError,
+  } = useQuery({
+    queryKey: ["user", "me"],
+    queryFn: fetchUserMe,
+    // only fetch while mobile menu is open (optional)
+    enabled: true,
+    // keep stale time short for user info
+    staleTime: 1000 * 60, // 1 minute
+  });
+
+  const signoutMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/auth/signout", { method: "POST" });
+      if (!res.ok) throw new Error(`Sign out failed: ${res.status}`);
+    },
+    onSuccess: () => {
+      setUser(null);
+      window.location.reload();
+    },
+    onError: (error: any) => {
+      console.error("Sign out error:", error);
+    },
+  });
+
+  useEffect(() => {
+    if (mePayload) {
+      // support different response shapes: { data: user } or raw user
+      console.log(mePayload, "ME PAYLOAD");
+
+      const u = mePayload?.user ?? mePayload;
+      setUser(u ?? null);
+    }
+  }, [mePayload]);
+
+  useEffect(() => {
+    if (userError) {
+      setUser(null);
+    }
+  }, [userError]);
   return (
     <header className="sticky top-0 z-10">
       <nav aria-label="Top">
@@ -387,18 +441,30 @@ HomeMenu.Header = function NavigationHeader() {
             </form>
 
             <div className="flex items-center space-x-6">
-              <Link
-                href="/signin"
-                className="text-sm font-medium text-white hover:text-gray-100"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/signup"
-                className="text-sm font-medium text-white hover:text-gray-100"
-              >
-                Create an account
-              </Link>
+              {!user && (
+                <Link
+                  href="/signin"
+                  className="text-sm font-medium text-white hover:text-gray-100"
+                >
+                  Sign in
+                </Link>
+              )}
+              {!user && (
+                <Link
+                  href="/signup"
+                  className="text-sm font-medium text-white hover:text-gray-100"
+                >
+                  Create an account
+                </Link>
+              )}
+              {user && (
+                <Button
+                  onClick={() => signoutMutation.mutate()}
+                  className="text-sm font-medium text-white hover:text-gray-100"
+                >
+                  Logout
+                </Button>
+              )}
             </div>
           </div>
         </div>
