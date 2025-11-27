@@ -401,9 +401,6 @@ HomeMenu.Header = function NavigationHeader() {
 
   useEffect(() => {
     if (mePayload) {
-      // support different response shapes: { data: user } or raw user
-      console.log(mePayload, "ME PAYLOAD");
-
       const u = mePayload?.user ?? mePayload;
       setUser(u ?? null);
     }
@@ -441,23 +438,24 @@ HomeMenu.Header = function NavigationHeader() {
             </form>
 
             <div className="flex items-center space-x-6">
-              {!user && (
-                <Link
-                  href="/signin"
-                  className="text-sm font-medium text-white hover:text-gray-100"
-                >
-                  Sign in
-                </Link>
-              )}
-              {!user && (
-                <Link
-                  href="/signup"
-                  className="text-sm font-medium text-white hover:text-gray-100"
-                >
-                  Create an account
-                </Link>
-              )}
-              {user && (
+              {userLoading ? (
+                <div className="text-sm font-medium text-white">Loading...</div>
+              ) : !user ? (
+                <>
+                  <Link
+                    href="/signin"
+                    className="text-sm font-medium text-white hover:text-gray-100"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="text-sm font-medium text-white hover:text-gray-100"
+                  >
+                    Create an account
+                  </Link>
+                </>
+              ) : (
                 <Button
                   onClick={() => signoutMutation.mutate()}
                   className="text-sm font-medium text-white hover:text-gray-100"

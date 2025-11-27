@@ -14,7 +14,6 @@ export async function fetchBrands(): Promise<Brand[]> {
   try {
     const response = await wc.get("products/brands", { per_page: 100 });
     brands = response.data;
-    console.log("[brands loaded:", brands.length, brands[0]);
   } catch (error: any) {
     console.error(
       "woocommerce brands error:",

@@ -46,10 +46,13 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
-        <h1 className="text-2xl font-bold text-center">Sign Up</h1>
-        {error && <p className="text-red-500">{error}</p>}
+    <div className="flex items-center justify-center min-h-screen px-4 bg-gray-900 ">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-sm sm:max-w-md space-y-4 p-6 bg-white rounded-lg shadow-md"
+      >
+        <h1 className="text-xl sm:text-2xl font-bold text-center">Sign Up</h1>
+        {error && <p className="text-red-500 text-center">{error}</p>}
         <div>
           <Label htmlFor="username">Username</Label>
           <Input
@@ -58,6 +61,7 @@ export default function SignupPage() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
+            className="w-full"
           />
         </div>
         <div>
@@ -68,6 +72,7 @@ export default function SignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className="w-full"
           />
         </div>
         <div>
@@ -78,14 +83,15 @@ export default function SignupPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className="w-full"
           />
         </div>
         <Button type="submit" disabled={mutation.isPending} className="w-full">
           {mutation.isPending ? "Signing up..." : "Sign Up"}
         </Button>
-        <p className="text-center">
+        <p className="text-center text-sm">
           Already have an account?{" "}
-          <a href="/signin" className="text-blue-500">
+          <a href="/signin" className="text-blue-500 hover:underline">
             Sign in
           </a>
         </p>

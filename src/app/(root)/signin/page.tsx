@@ -25,8 +25,7 @@ export default function SignInPage() {
       return body;
     },
     onSuccess: (data) => {
-      console.log("id", data.userId);
-      router.push("/shop"); // Redirect to shop on successful signin
+      router.push("/"); // Redirect to shop on successful signin
     },
     onError: (error: any) => {
       setError(error.message ?? "Unable to sign in");

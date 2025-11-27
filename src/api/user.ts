@@ -21,7 +21,6 @@ export async function createUser(userData: {
   try {
     const response = await wc.post("customers", userData);
     const user = response.data;
-    console.log("[user created:", user.id, user.email);
     return user;
   } catch (error: any) {
     console.error(
@@ -34,12 +33,9 @@ export async function createUser(userData: {
 export async function getUser(userId: string): Promise<User | null> {
   try {
     if (!userId) {
-      console.log("[-fetch user-] No userId provided");
       return null;
     }
     const response = await wc.get(`customers/${userId}`);
-    console.log("[-fetch user-]", response.data);
-
     return response.data;
   } catch (error: any) {
     console.error(
