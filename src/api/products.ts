@@ -10,11 +10,11 @@ export type Product = {
   attributes?: { name: string; options: string[] }[];
 };
 
-export async function fetchProducts(): Promise<Product[]> {
+export async function fetchProducts(page: number): Promise<Product[]> {
   let products: Product[] = [];
 
   try {
-    const response = await wc.get("products", { per_page: 100 });
+    const response = await wc.get("products", { per_page: 10, page });
     products = response.data;
   } catch (error: any) {
     console.error("woocommerce error:", error?.response?.data ?? error.message);

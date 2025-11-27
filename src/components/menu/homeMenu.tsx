@@ -33,6 +33,8 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import clsx from "clsx";
+import { usePathname } from "next/navigation";
 
 type NavigationItem = {
   name: string;
@@ -75,6 +77,10 @@ const HomeMenuContext = createContext<{
   userLoading: boolean;
   userError: unknown;
 } | null>(null);
+
+type HomeMenuProps = {
+  withhero?: boolean;
+};
 
 const useHomeMenu = () => {
   const context = useContext(HomeMenuContext);
@@ -323,6 +329,7 @@ HomeMenu.Mobile = function MobileMenu() {
 // Desktop Navigation Subcomponent
 HomeMenu.Desktop = function DesktopNavigation() {
   const { navigation } = useHomeMenu();
+  const pathname = usePathname();
   return (
     <div className="hidden h-full lg:flex">
       {/* Flyout menus */}
@@ -383,7 +390,10 @@ HomeMenu.Desktop = function DesktopNavigation() {
             <a
               key={page.name}
               href={page.href}
-              className="flex items-center text-sm font-medium text-white"
+              className={clsx(
+                "flex items-center text-sm font-medium text-white",
+                pathname === page.href && "border-b-2 border-b-white"
+              )}
             >
               {page.name}
             </a>
@@ -496,7 +506,7 @@ HomeMenu.Header = function NavigationHeader() {
               <div className="flex h-16 items-center justify-between">
                 {/* Logo (lg+) */}
                 <div className="hidden lg:flex lg:flex-1 lg:items-center">
-                  <a href="#">
+                  <a href="/">
                     <span className="sr-only">Your Company</span>
                     <Image
                       alt="Artegani | Genti de lux din piele naturala"
@@ -532,7 +542,7 @@ HomeMenu.Header = function NavigationHeader() {
                 </div>
 
                 {/* Logo (lg-) */}
-                <a href="#" className="lg:hidden">
+                <a href="/" className="lg:hidden">
                   <span className="sr-only">Your Company</span>
                   <Image
                     alt="artegani logo"
@@ -628,12 +638,12 @@ HomeMenu.Hero = function HeroSection() {
   );
 };
 
-export default function HomeMenuComponent() {
+export default function HomeMenuComponent({ withhero }: HomeMenuProps) {
   return (
     <HomeMenu>
       <HomeMenu.Header />
       <HomeMenu.Mobile />
-      <HomeMenu.Hero />
+      {withhero && <HomeMenu.Hero />}
     </HomeMenu>
   );
 }
