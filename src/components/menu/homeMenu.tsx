@@ -238,9 +238,12 @@ HomeMenu.Mobile = function MobileMenu() {
 
           <div className="space-y-6 border-t border-gray-200 px-4 py-6">
             <div className="flow-root">
-              <a href="#" className="-m-2 block p-2 font-medium text-gray-900">
+              <Link
+                href="/signup"
+                className="-m-2 block p-2 font-medium text-gray-900"
+              >
                 Create an account
-              </a>
+              </Link>
             </div>
             <div className="flow-root">
               <Link
@@ -390,12 +393,12 @@ HomeMenu.Header = function NavigationHeader() {
               >
                 Sign in
               </Link>
-              <a
-                href="#"
+              <Link
+                href="/signup"
                 className="text-sm font-medium text-white hover:text-gray-100"
               >
                 Create an account
-              </a>
+              </Link>
             </div>
           </div>
         </div>

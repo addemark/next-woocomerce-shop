@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,32 +12,37 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      username: string;
+      email: string;
+      password: string;
+    }) => {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify(data),
       });
-
-      if (response.ok) {
-        router.push("/signin");
-      } else {
-        const data = await response.json();
-        setError(data.error || "Signup failed");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Signup failed");
       }
-    } catch (err) {
-      setError("An error occurred");
-    } finally {
-      setLoading(false);
-    }
+      return response.json();
+    },
+    onSuccess: () => {
+      router.push("/signin");
+    },
+    onError: (error: any) => {
+      setError(error.message);
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    mutation.mutate({ username, email, password });
   };
 
   return (
@@ -74,8 +80,8 @@ export default function SignupPage() {
             required
           />
         </div>
-        <Button type="submit" disabled={loading} className="w-full">
-          {loading ? "Signing up..." : "Sign Up"}
+        <Button type="submit" disabled={mutation.isPending} className="w-full">
+          {mutation.isPending ? "Signing up..." : "Sign Up"}
         </Button>
         <p className="text-center">
           Already have an account?{" "}

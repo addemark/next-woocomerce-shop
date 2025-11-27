@@ -2,41 +2,41 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 
 export default function SignInPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    setError(null);
-    setLoading(true);
-    setToken(null);
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async (data: { username: string; password: string }) => {
       const response = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify(data),
       });
-
       const body = await response.json();
-
       if (!response.ok) {
-        setError(body?.error ?? "Invalid credentials");
-        return;
+        throw new Error(body?.error ?? "Invalid credentials");
       }
+      return body;
+    },
+    onSuccess: (data) => {
+      console.log("id", data.userId);
+      router.push("/shop"); // Redirect to shop on successful signin
+    },
+    onError: (error: any) => {
+      setError(error.message ?? "Unable to sign in");
+    },
+  });
 
-      setToken(body.token);
-      console.log("id", body.userId);
-    } catch (err: any) {
-      setError(err.message ?? "Unable to sign in");
-    } finally {
-      setLoading(false);
-    }
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    mutation.mutate({ username, password });
   };
 
   return (
@@ -93,18 +93,12 @@ export default function SignInPage() {
             </div>
           )}
 
-          {token && (
-            <div className="rounded-md bg-green-50 p-3 text-sm text-green-700 break-all">
-              Signed in! Token: {token} ---
-            </div>
-          )}
-
           <button
             type="submit"
-            disabled={loading}
+            disabled={mutation.isPending}
             className="flex w-full justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {mutation.isPending ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
