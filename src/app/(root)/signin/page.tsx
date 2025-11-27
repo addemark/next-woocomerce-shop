@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
+import { Input } from "@headlessui/react";
 
 export default function SignInPage() {
   const [username, setUsername] = useState("");
@@ -44,7 +45,7 @@ export default function SignInPage() {
         <div className="text-center">
           <h1 className="text-2xl font-semibold text-gray-900">Sign in</h1>
           <p className="mt-2 text-sm text-gray-500">
-            Enter your WooCommerce credentials to continue.
+            Enter your credentials to continue.
           </p>
         </div>
 
@@ -56,7 +57,7 @@ export default function SignInPage() {
             >
               Username or email
             </label>
-            <input
+            <Input
               id="username"
               name="username"
               value={username}
@@ -74,7 +75,7 @@ export default function SignInPage() {
             >
               Password
             </label>
-            <input
+            <Input
               id="password"
               name="password"
               type="password"
@@ -87,9 +88,10 @@ export default function SignInPage() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
-              {error}
-            </div>
+            <div
+              className="rounded-md bg-red-50 p-3 text-sm text-red-700"
+              dangerouslySetInnerHTML={{ __html: error }}
+            />
           )}
 
           <button

@@ -33,7 +33,6 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { sl } from "zod/v4/locales";
 
 type NavigationItem = {
   name: string;
@@ -58,13 +57,12 @@ type Brand = {
   image?: { src: string; alt?: string };
 };
 
+type User = { id: number; name?: string; email?: string; [k: string]: any };
+
 const currencies = ["RON"];
 const baseNavigation: Navigation = {
   categories: [],
-  pages: [
-    { name: "Company", href: "#" },
-    { name: "Stores", href: "#" },
-  ],
+  pages: [{ name: "Shop", href: "/shop" }],
 };
 
 // Context for shared state
@@ -72,6 +70,10 @@ const HomeMenuContext = createContext<{
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
   navigation: Navigation;
+  user: User | null;
+  setUser: (user: User | null) => void;
+  userLoading: boolean;
+  userError: unknown;
 } | null>(null);
 
 const useHomeMenu = () => {
@@ -86,6 +88,7 @@ const useHomeMenu = () => {
 function HomeMenu({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navigation, setNavigation] = useState<Navigation>(baseNavigation);
+  const [user, setUser] = useState<User | null>(null);
 
   const fetchBrands = async () => {
     const response = await fetch("/api/brands");
@@ -100,6 +103,23 @@ function HomeMenu({ children }: { children: React.ReactNode }) {
     queryKey: ["brands"],
     queryFn: fetchBrands,
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const fetchUserMe = async () => {
+    const res = await fetch("/api/user/me");
+    if (!res.ok) throw new Error(`Failed to fetch user: ${res.status}`);
+    return res.json();
+  };
+
+  const {
+    data: mePayload,
+    isLoading: userLoading,
+    error: userError,
+  } = useQuery({
+    queryKey: ["user", "me"],
+    queryFn: fetchUserMe,
+    enabled: true,
+    staleTime: 1000 * 60, // 1 minute
   });
 
   useEffect(() => {
@@ -132,9 +152,30 @@ function HomeMenu({ children }: { children: React.ReactNode }) {
     }
   }, [brands]);
 
+  useEffect(() => {
+    if (mePayload) {
+      const u = mePayload?.user ?? mePayload;
+      setUser(u ?? null);
+    }
+  }, [mePayload]);
+
+  useEffect(() => {
+    if (userError) {
+      setUser(null);
+    }
+  }, [userError]);
+
   return (
     <HomeMenuContext.Provider
-      value={{ mobileMenuOpen, setMobileMenuOpen, navigation }}
+      value={{
+        mobileMenuOpen,
+        setMobileMenuOpen,
+        navigation,
+        user,
+        setUser,
+        userLoading,
+        userError,
+      }}
     >
       {children}
     </HomeMenuContext.Provider>
@@ -143,7 +184,7 @@ function HomeMenu({ children }: { children: React.ReactNode }) {
 
 // Mobile Menu Subcomponent
 HomeMenu.Mobile = function MobileMenu() {
-  const { mobileMenuOpen, setMobileMenuOpen, navigation } = useHomeMenu();
+  const { mobileMenuOpen, setMobileMenuOpen, navigation, user } = useHomeMenu();
 
   return (
     <Dialog
@@ -229,34 +270,28 @@ HomeMenu.Mobile = function MobileMenu() {
           <div className="space-y-6 border-t border-gray-200 px-4 py-6">
             {navigation.pages.map((page) => (
               <div key={page.name} className="flow-root">
-                <a
+                <Link
                   href={page.href}
                   className="-m-2 block p-2 font-medium text-gray-900"
                 >
                   {page.name}
-                </a>
+                </Link>
               </div>
             ))}
           </div>
 
-          <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-            <div className="flow-root">
-              <Link
-                href="/signup"
-                className="-m-2 block p-2 font-medium text-gray-900"
-              >
-                Create an account
-              </Link>
+          {user && (
+            <div className="space-y-6 border-t border-gray-200 px-4 py-6">
+              <div className="flow-root">
+                <Link
+                  href="/profile"
+                  className="-m-2 block p-2 font-medium text-gray-900"
+                >
+                  Hello, {user.name ?? user.email}
+                </Link>
+              </div>
             </div>
-            <div className="flow-root">
-              <Link
-                href="/signin"
-                className="-m-2 block p-2 font-medium text-gray-900"
-              >
-                Sign in
-              </Link>
-            </div>
-          </div>
+          )}
 
           <div className="space-y-6 border-t border-gray-200 px-4 py-6">
             {/* Currency selector */}
@@ -296,7 +331,7 @@ HomeMenu.Desktop = function DesktopNavigation() {
           {navigation.categories.map((category) => (
             <Popover key={category.name} className="flex">
               <div className="relative flex">
-                <PopoverButton className="group relative flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out">
+                <PopoverButton className="group relative flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out focus:outline-0">
                   {category.name}
                   <span
                     aria-hidden="true"
@@ -361,29 +396,7 @@ HomeMenu.Desktop = function DesktopNavigation() {
 
 // Navigation Header Subcomponent
 HomeMenu.Header = function NavigationHeader() {
-  const { setMobileMenuOpen } = useHomeMenu();
-  type User = { id: number; name?: string; email?: string; [k: string]: any };
-
-  const [user, setUser] = useState<User | null>(null);
-
-  const fetchUserMe = async () => {
-    const res = await fetch("/api/user/me");
-    if (!res.ok) throw new Error(`Failed to fetch user: ${res.status}`);
-    return res.json();
-  };
-
-  const {
-    data: mePayload,
-    isLoading: userLoading,
-    error: userError,
-  } = useQuery({
-    queryKey: ["user", "me"],
-    queryFn: fetchUserMe,
-    // only fetch while mobile menu is open (optional)
-    enabled: true,
-    // keep stale time short for user info
-    staleTime: 1000 * 60, // 1 minute
-  });
+  const { setMobileMenuOpen, user, setUser, userLoading } = useHomeMenu();
 
   const signoutMutation = useMutation({
     mutationFn: async () => {
@@ -392,25 +405,58 @@ HomeMenu.Header = function NavigationHeader() {
     },
     onSuccess: () => {
       setUser(null);
-      window.location.reload();
     },
     onError: (error: any) => {
       console.error("Sign out error:", error);
     },
   });
 
+  // Avoid text flicker while the auth state is still being resolved
+  const [hasResolvedUser, setHasResolvedUser] = useState(false);
   useEffect(() => {
-    if (mePayload) {
-      const u = mePayload?.user ?? mePayload;
-      setUser(u ?? null);
+    if (!userLoading) {
+      setHasResolvedUser(true);
     }
-  }, [mePayload]);
+  }, [userLoading]);
 
-  useEffect(() => {
-    if (userError) {
-      setUser(null);
+  const renderAuthActions = () => {
+    if (!hasResolvedUser) {
+      return (
+        <div
+          className="h-5 w-28 animate-pulse rounded-full bg-white/20"
+          aria-hidden
+        />
+      );
     }
-  }, [userError]);
+
+    if (!user) {
+      return (
+        <>
+          <Link
+            href="/signin"
+            className="text-sm font-medium text-white hover:text-gray-100"
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/signup"
+            className="text-sm font-medium text-white hover:text-gray-100"
+          >
+            Create an account
+          </Link>
+        </>
+      );
+    }
+
+    return (
+      <Button
+        onClick={() => signoutMutation.mutate()}
+        className="text-sm font-medium text-white hover:text-gray-100"
+      >
+        Logout
+      </Button>
+    );
+  };
   return (
     <header className="sticky top-0 z-10">
       <nav aria-label="Top">
@@ -438,31 +484,7 @@ HomeMenu.Header = function NavigationHeader() {
             </form>
 
             <div className="flex items-center space-x-6">
-              {userLoading ? (
-                <div className="text-sm font-medium text-white">Loading...</div>
-              ) : !user ? (
-                <>
-                  <Link
-                    href="/signin"
-                    className="text-sm font-medium text-white hover:text-gray-100"
-                  >
-                    Sign in
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="text-sm font-medium text-white hover:text-gray-100"
-                  >
-                    Create an account
-                  </Link>
-                </>
-              ) : (
-                <Button
-                  onClick={() => signoutMutation.mutate()}
-                  className="text-sm font-medium text-white hover:text-gray-100"
-                >
-                  Logout
-                </Button>
-              )}
+              {renderAuthActions()}
             </div>
           </div>
         </div>

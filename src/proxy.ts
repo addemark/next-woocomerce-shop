@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { env } from "@/env.mjs";
+// import { env } from "@/env.mjs";
 
-const protectedRoutes = ["/shop"]; // Add more protected routes as needed, e.g., ["/shop", "/account"]
+const protectedRoutes: string[] = []; // Add more protected routes as needed, e.g., ["/shop", "/account"]
 
 export async function proxy(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
-  const isProtected = protectedRoutes.some((route) =>
+  const isProtected = protectedRoutes?.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   );
 
