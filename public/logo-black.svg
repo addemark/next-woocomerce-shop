@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="400" height="140"
+     viewBox="0 0 400 140">
+
+  <!-- Main group -->
+  <g id="Artegani-logo" fill="none" stroke="none">
+    
+    <!-- Monogram icon: stylized "A" with a brush-like crossbar -->
+    <g id="icon" transform="translate(30,15)" stroke="#000" stroke-linejoin="round" stroke-linecap="round">
+      <!-- A shape -->
+      <path d="M0 100 L40 0 L80 100 Z"
+            stroke-width="8" fill="none" />
+      <!-- Crossbar / brush stroke -->
+      <path d="M18 58 Q40 46 62 58"
+            stroke-width="8" fill="none" />
+    </g>
+
+    <!-- Wordmark -->
+    <g id="wordmark" transform="translate(130,0)">
+      <text x="0" y="90"
+            fill="#000"
+            font-family="Didot, 'Bodoni MT', 'Times New Roman', serif"
+            font-size="48"
+            letter-spacing="3">
+        Artegani
+      </text>
+    </g>
+
+  </g>
+</svg>
