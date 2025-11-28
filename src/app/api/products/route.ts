@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchProducts } from "@/helpers/products";
+import { fetchProducts } from "@/lib/woo-api/products";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

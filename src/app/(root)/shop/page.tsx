@@ -1,4 +1,4 @@
-import { fetchProducts, Product } from "@/helpers/products";
+import { fetchProducts, Product } from "@/lib/woo-api/products";
 import HeroHeader from "@/components/hero/heroHeader";
 import ProductsList from "@/components/shop/productsList";
 import { env } from "@/env.mjs";

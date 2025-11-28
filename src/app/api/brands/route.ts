@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchBrands } from "@/helpers/brands";
+import { fetchBrands } from "@/lib/woo-api/brands";
 
 export async function GET() {
   try {

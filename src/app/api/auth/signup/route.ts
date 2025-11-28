@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createUser } from "@/helpers/user";
+import { createUser } from "@/lib/woo-api/user";
 
 export async function POST(request: Request) {
   try {

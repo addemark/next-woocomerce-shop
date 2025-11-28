@@ -1,4 +1,4 @@
-import { fetchCategories, Category } from "@/helpers/categories";
+import { fetchCategories, Category } from "@/lib/woo-api/categories";
 
 export const ExplorCategories = async () => {
   let categories: Category[] = [];

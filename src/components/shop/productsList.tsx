@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { Product } from "@/helpers/products";
+import { Product } from "@/lib/woo-api/products";
 
 type ProductsListProps = {
   initialProducts: Product[];
