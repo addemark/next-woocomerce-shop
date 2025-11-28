@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getUser } from "@/api/user";
+import { getUser } from "@/helpers/user";
 import { log } from "console";
 
 export async function GET() {

@@ -1,4 +1,4 @@
-import { fetchCategories, Category } from "@/api/categories";
+import { fetchCategories, Category } from "@/helpers/categories";
 
 export const ExplorCategories = async () => {
   let categories: Category[] = [];

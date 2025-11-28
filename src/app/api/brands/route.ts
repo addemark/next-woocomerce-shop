@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchBrands } from "@/api/brands";
+import { fetchBrands } from "@/helpers/brands";
 
 export async function GET() {
   try {
@@ -9,7 +9,7 @@ export async function GET() {
     console.error("brands api error:", error);
     return NextResponse.json(
       { error: "Failed to load brands" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
