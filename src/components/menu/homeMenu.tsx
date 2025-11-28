@@ -248,7 +248,7 @@ HomeMenu.Mobile = function MobileMenu() {
                             src={item.imageSrc}
                             className="aspect-square w-full rounded-md bg-gray-100 object-cover group-hover:opacity-75"
                           />
-                          <a
+                          <Link
                             href={item.href}
                             className="mt-6 block text-sm font-medium text-gray-900"
                           >
@@ -257,7 +257,7 @@ HomeMenu.Mobile = function MobileMenu() {
                               className="absolute inset-0 z-10"
                             />
                             {item.name}
-                          </a>
+                          </Link>
                           <p
                             aria-hidden="true"
                             className="mt-1 text-sm text-gray-500"
@@ -365,7 +365,7 @@ HomeMenu.Desktop = function DesktopNavigation() {
                             src={item.imageSrc}
                             className="aspect-square w-full rounded-md bg-gray-100 object-cover group-hover:opacity-75"
                           />
-                          <a
+                          <Link
                             href={item.href}
                             className="mt-4 block font-medium text-gray-900"
                           >
@@ -374,7 +374,7 @@ HomeMenu.Desktop = function DesktopNavigation() {
                               className="absolute inset-0 z-10"
                             />
                             {item.name}
-                          </a>
+                          </Link>
                           <p aria-hidden="true" className="mt-1">
                             Shop now
                           </p>
@@ -387,7 +387,7 @@ HomeMenu.Desktop = function DesktopNavigation() {
             </Popover>
           ))}
           {navigation.pages.map((page) => (
-            <a
+            <Link
               key={page.name}
               href={page.href}
               className={clsx(
@@ -396,7 +396,7 @@ HomeMenu.Desktop = function DesktopNavigation() {
               )}
             >
               {page.name}
-            </a>
+            </Link>
           ))}
         </div>
       </PopoverGroup>
@@ -506,7 +506,7 @@ HomeMenu.Header = function NavigationHeader() {
               <div className="flex h-16 items-center justify-between">
                 {/* Logo (lg+) */}
                 <div className="hidden lg:flex lg:flex-1 lg:items-center">
-                  <a href="/">
+                  <Link href="/">
                     <span className="sr-only">Your Company</span>
                     <Image
                       alt="Artegani | Genti de lux din piele naturala"
@@ -515,7 +515,7 @@ HomeMenu.Header = function NavigationHeader() {
                       width={150}
                       height={150}
                     />
-                  </a>
+                  </Link>
                 </div>
 
                 <HomeMenu.Desktop />
@@ -542,22 +542,22 @@ HomeMenu.Header = function NavigationHeader() {
                 </div>
 
                 {/* Logo (lg-) */}
-                <a href="/" className="lg:hidden">
+                <Link href="/" className="lg:hidden">
                   <span className="sr-only">Your Company</span>
                   <Image
                     alt="artegani logo"
                     src={logo}
                     className="h-10 w-auto"
                   />
-                </a>
+                </Link>
 
                 <div className="flex flex-1 items-center justify-end">
-                  <a
+                  <Link
                     href="#"
                     className="hidden text-sm font-medium text-white lg:block"
                   >
                     Search
-                  </a>
+                  </Link>
 
                   <div className="flex items-center lg:ml-8">
                     {/* Help */}
@@ -568,12 +568,12 @@ HomeMenu.Header = function NavigationHeader() {
                         className="size-6"
                       />
                     </a>
-                    <a
+                    <Link
                       href="#"
                       className="hidden text-sm font-medium text-white lg:block"
                     >
                       Help
-                    </a>
+                    </Link>
 
                     {/* Cart */}
                     <div className="ml-4 flow-root lg:ml-8">
@@ -627,12 +627,12 @@ HomeMenu.Hero = function HeroSection() {
           options from our summer small-batch release while they're still in
           stock.
         </p>
-        <a
-          href="#"
+        <Link
+          href="/shop"
           className="mt-8 inline-block rounded-md border border-transparent bg-white px-8 py-3 text-base font-medium text-gray-900 hover:bg-gray-100"
         >
           Shop New Arrivals
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -11,14 +11,16 @@ export default function HeroHeader() {
               height={150}
               alt="Artegani"
               src={logo}
-              className="h-20 dark:hidden"
+              className="h-20 w-auto dark:hidden"
+              loading="eager"
             />
             <Image
               width={150}
               height={150}
               alt="Artegani"
               src={logo}
-              className="h-20 not-dark:hidden"
+              className="h-20 w-auto not-dark:hidden"
+              loading="eager"
             />
             <div className="hidden sm:mt-32 sm:flex lg:mt-16">
               <div className="relative rounded-full px-3 py-1 text-sm/6 text-gray-500 ring-1 ring-gray-900/10 hover:ring-gray-900/20 dark:text-gray-400 dark:ring-white/10 dark:hover:ring-white/20">
@@ -61,7 +63,8 @@ export default function HeroHeader() {
             height={667}
             alt=""
             src="https://images.unsplash.com/photo-1487017159836-4e23ece2e4cf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2102&q=80"
-            className="aspect-3/2 w-full bg-gray-50 object-cover lg:absolute lg:inset-0 lg:aspect-auto lg:h-full dark:bg-gray-800"
+            className="aspect-3/2 w-full h-auto bg-gray-50 object-cover lg:absolute lg:inset-0 lg:aspect-auto lg:h-full dark:bg-gray-800"
+            loading="eager"
           />
         </div>
       </div>

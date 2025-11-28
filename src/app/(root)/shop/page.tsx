@@ -6,9 +6,10 @@ import { env } from "@/env.mjs";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const currentPage = Number(searchParams?.page ?? "1");
+  const resolvedSearchParams = await searchParams;
+  const currentPage = Number(resolvedSearchParams?.page ?? "1");
   const initialPage =
     Number.isFinite(currentPage) && currentPage > 0 ? currentPage : 1;
   const perPage = Number(env.PER_PAGE) || 10;

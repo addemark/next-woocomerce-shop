@@ -11,6 +11,20 @@ export type Product = {
   slug: string;
   sku: string;
   parent_id: number;
+  description: string;
+  short_description: string;
+  average_rating: string;
+  rating_count: number;
+  categories: { id: number; name: string; slug: string }[];
+  regular_price: string;
+  sale_price: string;
+  on_sale: boolean;
+  stock_status: string;
+  stock_quantity: number | null;
+  weight: string;
+  dimensions: { length: string; width: string; height: string };
+  tags: { id: number; name: string; slug: string }[];
+  meta_data: { id: number; key: string; value: string }[];
 };
 
 export async function fetchProducts(

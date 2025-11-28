@@ -59,7 +59,6 @@ export default function ProductsList({
       return (lastPage.page ?? 1) + 1;
     },
   });
-  console.log({ data, isFetchingNextPage, hasNextPage, isError, error });
 
   const products = useMemo(
     () => data?.pages.flatMap((page) => page.products) ?? [],
@@ -104,7 +103,7 @@ export default function ProductsList({
           scrollThreshold={0.9}
         >
           <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-            {uniqueProducts.map((product) => (
+            {uniqueProducts.map((product, index) => (
               <div
                 key={`${product.id} + ${product.parent_id}`}
                 className="group relative"
@@ -117,13 +116,15 @@ export default function ProductsList({
                     product.images[0]?.src ??
                     "https://via.placeholder.com/500?text=No+Image"
                   }
+                  priority={index === 0}
+                  loading={index === 0 ? "eager" : undefined}
                   className="aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:opacity-75 lg:aspect-auto lg:h-80"
                 />
                 <div className="mt-4 flex justify-between">
                   <div>
                     <h3 className="text-sm text-gray-700">
                       <Link
-                        href={`${product.slug ?? product.permalink ?? "#"}`}
+                        href={`/shop/${product.slug ?? product.permalink ?? "#"}`}
                       >
                         <span aria-hidden="true" className="absolute inset-0" />
                         {product.name}
