@@ -50,3 +50,32 @@ export async function fetchProducts(
   }
   return { products, hasMore };
 }
+
+export async function fetchProductById(
+  id: null | number
+): Promise<Product | null> {
+  try {
+    const response = await wc.get("products", { id, per_page: 1 });
+    const product: Product = response.data;
+
+    return product;
+  } catch (error: any) {
+    console.error("woocommerce error:", error?.response?.data ?? error.message);
+    return null;
+  }
+}
+
+export async function fetchProductBySlug(
+  slug: string
+): Promise<Product | null> {
+  try {
+    const response = await wc.get("products", { slug, per_page: 1 });
+    const [product] = response.data ?? [];
+    if (!product?.id) return null;
+
+    return product;
+  } catch (error: any) {
+    console.error("woocommerce error:", error?.response?.data ?? error.message);
+    return null;
+  }
+}
