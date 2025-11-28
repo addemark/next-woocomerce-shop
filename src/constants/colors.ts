@@ -28,6 +28,7 @@ export const COLOR_MAP: Record<string, string> = {
   cola: "#3b2f2f",
   "pastel gray": "#c0c0c0",
   "pullman brown": "#5c4033",
+  "brown sugar": "#af6e4d",
 };
 
 export const resolveColor = (value: string) =>

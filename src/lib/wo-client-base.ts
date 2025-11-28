@@ -5,5 +5,5 @@ export const wc = new WooCommerce({
   url: env.API_URL,
   consumerKey: env.WC_CONSUMER_KEY,
   consumerSecret: env.WC_CONSUMER_SECRET,
-  version: "wc/v3",
+  version: "wc/v2",
 });

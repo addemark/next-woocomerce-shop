@@ -7,6 +7,7 @@ import { ProductGallery } from "@/components/productPage/product-gallery";
 import { ProductPricing } from "@/components/productPage/product-pricing";
 import { PurchaseActions } from "@/components/productPage/purchase-actions";
 import { RatingSummary } from "@/components/productPage/rating-summary";
+import { MaterialSelector } from "@/components/productPage/material-selector";
 import { DetailSection, GalleryImage } from "@/components/productPage/types";
 
 export default async function ProductPage({
@@ -27,6 +28,9 @@ export default async function ProductPage({
   );
   const colors =
     product.attributes?.find((attr) => attr.name.toLowerCase() === "color")
+      ?.options ?? [];
+  const materials =
+    product.attributes?.find((attr) => attr.name.toLowerCase() === "material")
       ?.options ?? [];
 
   const detailSections: DetailSection[] = [
@@ -129,6 +133,7 @@ export default async function ProductPage({
             <ProductDescription html={descriptionHtml} />
 
             <ColorSelector colors={colors} />
+            <MaterialSelector materials={materials} />
 
             <PurchaseActions />
 

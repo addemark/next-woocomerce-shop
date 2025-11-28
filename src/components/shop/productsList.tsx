@@ -68,8 +68,11 @@ export default function ProductsList({
   const uniqueProducts = useMemo(() => {
     const seen = new Set<string>();
     return products.filter((product) => {
-      if (seen.has(`${product.id} + ${product.parent_id}`)) return false;
-      seen.add(`${product.id} + ${product.parent_id}`);
+      console.log("product", product.sku);
+      if (product.sku == "CH-852") console.log("[prod]", product);
+      if (seen.has(`${product.id} - ${product.parent_id} - ${product.sku}`))
+        return false;
+      seen.add(`${product.id} - ${product.parent_id} - ${product.sku}`);
       return true;
     });
   }, [products]);
