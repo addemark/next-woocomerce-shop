@@ -13,7 +13,10 @@ export type Product = {
   parent_id: number;
 };
 
-export async function fetchProducts(page: number): Promise<{
+export async function fetchProducts(
+  page: number,
+  perPage: number
+): Promise<{
   products: Product[];
   hasMore: boolean;
 }> {
@@ -21,7 +24,7 @@ export async function fetchProducts(page: number): Promise<{
   let hasMore = false;
 
   try {
-    const response = await wc.get("products", { per_page: 8, page });
+    const response = await wc.get("products", { per_page: perPage, page });
     products = response.data;
     const totalPages = Number(
       response.headers?.["x-wp-totalpages"] ??

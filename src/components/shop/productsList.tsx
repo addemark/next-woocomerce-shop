@@ -10,11 +10,15 @@ import { Product } from "@/api/products";
 type ProductsListProps = {
   initialProducts: Product[];
   initialHasMore: boolean;
+  perPage: number;
+  initialPage?: number;
 };
 
 export default function ProductsList({
   initialProducts,
   initialHasMore,
+  initialPage = 1,
+  perPage,
 }: ProductsListProps) {
   const {
     data,
@@ -24,9 +28,11 @@ export default function ProductsList({
     isError,
     error,
   } = useInfiniteQuery({
-    queryKey: ["products"],
+    queryKey: ["products", perPage],
     queryFn: async ({ pageParam = 1 }) => {
-      const res = await fetch(`/api/products?page=${pageParam}`);
+      const res = await fetch(
+        `/api/products?page=${pageParam}&perPage=${perPage}`
+      );
       if (!res.ok) {
         throw new Error(`Failed to load products (${res.status})`);
       }
@@ -37,14 +43,14 @@ export default function ProductsList({
         page: Number(pageParam),
       };
     },
-    initialPageParam: 1,
+    initialPageParam: initialPage,
     initialData: {
-      pageParams: [1],
+      pageParams: [initialPage],
       pages: [
         {
           products: initialProducts,
           hasMore: initialHasMore,
-          page: 1,
+          page: initialPage,
         },
       ],
     },
@@ -53,6 +59,7 @@ export default function ProductsList({
       return (lastPage.page ?? 1) + 1;
     },
   });
+  console.log({ data, isFetchingNextPage, hasNextPage, isError, error });
 
   const products = useMemo(
     () => data?.pages.flatMap((page) => page.products) ?? [],
@@ -68,8 +75,7 @@ export default function ProductsList({
     });
   }, [products]);
 
-  const nextPageNumber =
-    (data?.pages?.[data.pages.length - 1]?.page ?? 1) + 1;
+  const nextPageNumber = (data?.pages?.[data.pages.length - 1]?.page ?? 1) + 1;
   const nextPageHref = `/shop?page=${nextPageNumber}`;
 
   return (

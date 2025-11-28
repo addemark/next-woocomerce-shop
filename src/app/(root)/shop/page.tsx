@@ -1,12 +1,22 @@
 import { fetchProducts, Product } from "@/api/products";
 import HeroHeader from "@/components/hero/heroHeader";
 import ProductsList from "@/components/shop/productsList";
+import { env } from "@/env.mjs";
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const currentPage = Number(searchParams?.page ?? "1");
+  const initialPage =
+    Number.isFinite(currentPage) && currentPage > 0 ? currentPage : 1;
+  const perPage = Number(env.PER_PAGE) || 10;
+
   let products: Product[] = [];
   let hasMore = false;
   try {
-    const result = await fetchProducts(1);
+    const result = await fetchProducts(initialPage, perPage);
     products = result.products;
     hasMore = result.hasMore;
   } catch (error: any) {
@@ -16,7 +26,12 @@ export default async function Home() {
   return (
     <div className="bg-white">
       <HeroHeader />
-      <ProductsList initialProducts={products} initialHasMore={hasMore} />
+      <ProductsList
+        initialProducts={products}
+        initialHasMore={hasMore}
+        perPage={perPage}
+        initialPage={initialPage}
+      />
     </div>
   );
 }
