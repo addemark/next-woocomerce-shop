@@ -27,6 +27,17 @@ export type Product = {
   meta_data: { id: number; key: string; value: string }[];
 };
 
+export type Variation = {
+  id: number;
+  price: string;
+  regular_price: string;
+  sale_price: string;
+  on_sale: boolean;
+  stock_status: string;
+  attributes: { id?: number; name: string; option: string }[];
+  image?: { src: string; alt?: string };
+};
+
 export async function fetchProducts(
   page: number,
   perPage: number
@@ -62,6 +73,20 @@ export async function fetchProductById(
   } catch (error: any) {
     console.error("woocommerce error:", error?.response?.data ?? error.message);
     return null;
+  }
+}
+
+export async function fetchProductVariations(
+  productId: number
+): Promise<Variation[]> {
+  try {
+    const response = await wc.get(`products/${productId}/variations`, {
+      per_page: 100,
+    });
+    return response.data ?? [];
+  } catch (error: any) {
+    console.error("woocommerce error:", error?.response?.data ?? error.message);
+    return [];
   }
 }
 

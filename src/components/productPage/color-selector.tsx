@@ -1,11 +1,22 @@
+'use client';
+
 import { resolveColor } from "@/constants/colors";
 
 type ColorSelectorProps = {
   colors: string[];
+  value?: string;
+  onChange?: (value: string) => void;
 };
 
-export function ColorSelector({ colors }: ColorSelectorProps) {
+export function ColorSelector({
+  colors,
+  value,
+  onChange,
+}: ColorSelectorProps) {
   if (!colors.length) return null;
+
+  const normalize = (val: string) => val.trim().toLowerCase();
+  const selectedValue = value ?? colors[0] ?? "";
 
   return (
     <div className="mt-6">
@@ -23,13 +34,14 @@ export function ColorSelector({ colors }: ColorSelectorProps) {
                 still show a sensible swatch; fall back to the raw color string if unknown.
               */}
               <input
-                defaultValue={color}
-                defaultChecked={index === 0}
+                checked={normalize(color) === normalize(selectedValue)}
                 name="color"
                 type="radio"
                 aria-label={color}
                 className="size-8 appearance-none rounded-full forced-color-adjust-none checked:outline-2 checked:outline-offset-2 focus-visible:outline-3 focus-visible:outline-offset-3"
                 style={{ backgroundColor: resolveColor(color) }}
+                readOnly={!onChange}
+                onChange={() => onChange?.(color)}
               />
               <span className="text-sm text-gray-700">{color}</span>
             </label>

@@ -29,6 +29,7 @@ export const COLOR_MAP: Record<string, string> = {
   "pastel gray": "#c0c0c0",
   "pullman brown": "#5c4033",
   "brown sugar": "#af6e4d",
+  feldgrau: "#4d5d53",
 };
 
 export const resolveColor = (value: string) =>

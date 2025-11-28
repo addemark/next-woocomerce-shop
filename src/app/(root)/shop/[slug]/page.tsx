@@ -1,13 +1,11 @@
 import { fetchProductBySlug } from "@/lib/woo-api/products";
 import { notFound } from "next/navigation";
-import { ColorSelector } from "@/components/productPage/color-selector";
 import { DetailAccordion } from "@/components/productPage/detail-accordion";
 import { ProductDescription } from "@/components/productPage/product-description";
 import { ProductGallery } from "@/components/productPage/product-gallery";
 import { ProductPricing } from "@/components/productPage/product-pricing";
-import { PurchaseActions } from "@/components/productPage/purchase-actions";
 import { RatingSummary } from "@/components/productPage/rating-summary";
-import { MaterialSelector } from "@/components/productPage/material-selector";
+import { ProductVariations } from "@/components/productPage/product-variations";
 import { DetailSection, GalleryImage } from "@/components/productPage/types";
 
 export default async function ProductPage({
@@ -132,10 +130,11 @@ export default async function ProductPage({
 
             <ProductDescription html={descriptionHtml} />
 
-            <ColorSelector colors={colors} />
-            <MaterialSelector materials={materials} />
-
-            <PurchaseActions />
+            <ProductVariations
+              productId={product.id}
+              colors={colors}
+              materials={materials}
+            />
 
             <DetailAccordion sections={detailSections} />
           </div>
