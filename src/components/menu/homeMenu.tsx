@@ -1,5 +1,6 @@
 "use client";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import CartDrawer from "@/components/shop/cart/drawerCart";
 import {
   Fragment,
   createContext,
@@ -69,6 +70,8 @@ const baseNavigation: Navigation = {
 
 // Context for shared state
 const HomeMenuContext = createContext<{
+  cartOpen: boolean;
+  setCartOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
   navigation: Navigation;
@@ -82,7 +85,7 @@ type HomeMenuProps = {
   withhero?: boolean;
 };
 
-const useHomeMenu = () => {
+export const useHomeMenu = () => {
   const context = useContext(HomeMenuContext);
   if (!context) {
     throw new Error("HomeMenu subcomponents must be used within HomeMenu");
@@ -95,6 +98,7 @@ function HomeMenu({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navigation, setNavigation] = useState<Navigation>(baseNavigation);
   const [user, setUser] = useState<User | null>(null);
+  const [cartOpen, setCartOpen] = useState(false);
 
   const fetchBrands = async () => {
     const response = await fetch("/api/brands");
@@ -181,6 +185,8 @@ function HomeMenu({ children }: { children: React.ReactNode }) {
         setUser,
         userLoading,
         userError,
+        cartOpen,
+        setCartOpen,
       }}
     >
       {children}
@@ -406,7 +412,8 @@ HomeMenu.Desktop = function DesktopNavigation() {
 
 // Navigation Header Subcomponent
 HomeMenu.Header = function NavigationHeader() {
-  const { setMobileMenuOpen, user, setUser, userLoading } = useHomeMenu();
+  const { setMobileMenuOpen, user, setUser, userLoading, setCartOpen } =
+    useHomeMenu();
 
   const signoutMutation = useMutation({
     mutationFn: async () => {
@@ -576,7 +583,10 @@ HomeMenu.Header = function NavigationHeader() {
                     </Link>
 
                     {/* Cart */}
-                    <div className="ml-4 flow-root lg:ml-8">
+                    <div
+                      className="ml-4 flow-root lg:ml-8"
+                      onClick={() => setCartOpen((prev: boolean) => !prev)}
+                    >
                       <a href="#" className="group -m-2 flex items-center p-2">
                         <ShoppingBagIcon
                           aria-hidden="true"
@@ -644,6 +654,7 @@ export default function HomeMenuComponent({ withhero }: HomeMenuProps) {
       <HomeMenu.Header />
       <HomeMenu.Mobile />
       {withhero && <HomeMenu.Hero />}
+      <CartDrawer />
     </HomeMenu>
   );
 }
