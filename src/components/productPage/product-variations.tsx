@@ -79,6 +79,8 @@ export function ProductVariations({
   }, [data, error, isError, isFetching]);
 
   const hasAvailableVariation = (data?.count ?? 0) > 0;
+  const selectedVariation = data?.data?.[0];
+  const selectedVariationId = selectedVariation?.id;
 
   return (
     <div className="mt-6 space-y-6">
@@ -112,7 +114,11 @@ export function ProductVariations({
         )}
       </div>
 
-      <PurchaseActions disabled={!hasAvailableVariation} />
+      <PurchaseActions
+        disabled={!hasAvailableVariation}
+        productId={productId}
+        variationId={selectedVariationId}
+      />
     </div>
   );
 }
