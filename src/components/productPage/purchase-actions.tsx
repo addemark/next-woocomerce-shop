@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@headlessui/react";
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { useMutation } from "@tanstack/react-query";
 
@@ -53,7 +54,7 @@ export function PurchaseActions({
 
   return (
     <div className="mt-10 flex">
-      <button
+      <Button
         type="button"
         disabled={isDisabled}
         className={`flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent px-8 py-3 text-base font-medium sm:w-full ${
@@ -64,15 +65,15 @@ export function PurchaseActions({
         onClick={() => addToOrder.mutate()}
       >
         {label}
-      </button>
+      </Button>
 
-      <button
+      <Button
         type="button"
         className="ml-4 flex items-center justify-center rounded-md px-3 py-3 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
       >
         <HeartIcon aria-hidden="true" className="size-6 shrink-0" />
         <span className="sr-only">Add to favorites</span>
-      </button>
+      </Button>
     </div>
   );
 }

@@ -221,7 +221,7 @@ HomeMenu.Mobile = function MobileMenu() {
           className="relative flex w-full max-w-xs transform flex-col overflow-y-auto bg-white pb-12 shadow-xl transition duration-300 ease-in-out data-closed:-translate-x-full"
         >
           <div className="flex px-4 pt-5 pb-2">
-            <button
+            <Button
               type="button"
               onClick={() => setMobileMenuOpen(false)}
               className="relative -m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400"
@@ -229,7 +229,7 @@ HomeMenu.Mobile = function MobileMenu() {
               <span className="absolute -inset-0.5" />
               <span className="sr-only">Close menu</span>
               <XMarkIcon aria-hidden="true" className="size-6" />
-            </button>
+            </Button>
           </div>
 
           {/* Links */}
@@ -563,14 +563,14 @@ HomeMenu.Header = function NavigationHeader() {
 
                 {/* Mobile menu and search (lg-) */}
                 <div className="flex flex-1 items-center lg:hidden">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setMobileMenuOpen(true)}
                     className="-ml-2 p-2 text-white"
                   >
                     <span className="sr-only">Open menu</span>
                     <Bars3Icon aria-hidden="true" className="size-6" />
-                  </button>
+                  </Button>
 
                   {/* Search */}
                   <a href="#" className="ml-2 p-2 text-white">
@@ -621,7 +621,7 @@ HomeMenu.Header = function NavigationHeader() {
                       className="ml-4 flow-root lg:ml-8"
                       onClick={() => setCartOpen((prev: boolean) => !prev)}
                     >
-                      <a href="#" className="group -m-2 flex items-center p-2">
+                      <Button className="group -m-2 flex items-center p-2">
                         <ShoppingBagIcon
                           aria-hidden="true"
                           className="size-6 shrink-0 text-white"
@@ -630,7 +630,7 @@ HomeMenu.Header = function NavigationHeader() {
                           {orderLoading ? "..." : totalItems}
                         </span>
                         <span className="sr-only">items in cart, view bag</span>
-                      </a>
+                      </Button>
                     </div>
                   </div>
                 </div>
