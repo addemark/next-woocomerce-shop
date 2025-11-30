@@ -6,6 +6,7 @@ export type Order = {
   total: string;
   currency: string;
   date_created: string;
+  customer_id?: number;
   billing: {
     first_name: string;
     last_name: string;

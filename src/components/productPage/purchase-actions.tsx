@@ -18,7 +18,10 @@ export function PurchaseActions({
   quantity = 1,
   onOrderReady,
 }: PurchaseActionsProps) {
-  const addToOrder = useMutation<{ data: { id: number } }, Error>({
+  const addToOrder = useMutation<
+    { data: { id: number }; totalItems?: number },
+    Error
+  >({
     mutationFn: async () => {
       const response = await fetch("/api/orders/items", {
         method: "POST",
@@ -32,7 +35,10 @@ export function PurchaseActions({
       if (!response.ok) {
         throw new Error(`Order request failed (${response.statusText})`);
       }
-      return response.json() as Promise<{ data: { id: number } }>;
+      return response.json() as Promise<{
+        data: { id: number };
+        totalItems?: number;
+      }>;
     },
     onSuccess: (result) => {
       const orderId = result?.data?.id;
