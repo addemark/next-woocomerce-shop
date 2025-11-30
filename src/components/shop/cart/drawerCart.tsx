@@ -1,7 +1,7 @@
 "use client";
-
+import { useEffect } from "react";
 import { useHomeMenu } from "@/components/menu/homeMenu";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogBackdrop,
@@ -11,20 +11,7 @@ import {
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
 import type { Order } from "@/lib/woo-api/orders";
-
-type OrderResponse = { data: Order };
-
-const fetchCurrentOrder = async (): Promise<Order> => {
-  const response = await fetch("/api/orders");
-  if (!response.ok) {
-    throw new Error(`Failed to fetch order (${response.statusText})`);
-  }
-  const payload: OrderResponse = await response.json();
-  if (!payload?.data) {
-    throw new Error("Order response missing data");
-  }
-  return payload.data;
-};
+import { fetchCurrentOrder, type OrderResponse } from "@/lib/orders-client";
 
 const formatCurrency = (value: number, currency?: string) => {
   const code = currency || "RON";
@@ -40,7 +27,8 @@ const formatCurrency = (value: number, currency?: string) => {
 };
 
 export default function CartDrawer() {
-  const { cartOpen, setCartOpen } = useHomeMenu();
+  const { cartOpen, setCartOpen, setTotalItems } = useHomeMenu();
+  const queryClient = useQueryClient();
   const {
     data: order,
     isLoading,
@@ -52,6 +40,35 @@ export default function CartDrawer() {
     queryFn: fetchCurrentOrder,
     enabled: cartOpen,
     refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    if (setTotalItems) {
+      const itemsCount =
+        order?.line_items?.reduce(
+          (sum, item) => sum + Number(item.quantity || 0),
+          0
+        ) ?? 0;
+      setTotalItems(itemsCount);
+    }
+  }, [order, setTotalItems]);
+
+  const removeItem = useMutation<Order, Error, { lineItemId: number }>({
+    mutationFn: async ({ lineItemId }) => {
+      if (!order?.id) throw new Error("Order not available");
+      const response = await fetch(
+        `/api/orders/${order.id}/items/${lineItemId}`,
+        { method: "DELETE" }
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to remove item (${response.statusText})`);
+      }
+      const payload: OrderResponse = await response.json();
+      return payload.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["order", "current"] });
+    },
   });
 
   const lineItems = order?.line_items ?? [];
@@ -119,6 +136,13 @@ export default function CartDrawer() {
                             </li>
                           )}
 
+                          {removeItem.isError && (
+                            <li className="py-2 text-sm text-red-600">
+                              {removeItem.error?.message ??
+                                "Failed to remove item."}
+                            </li>
+                          )}
+
                           {!isLoading && !isError && lineItems.length === 0 && (
                             <li className="py-6 text-sm text-gray-500">
                               Your cart is empty.
@@ -176,9 +200,24 @@ export default function CartDrawer() {
                                       <div className="flex">
                                         <button
                                           type="button"
-                                          className="font-medium text-indigo-600 hover:text-indigo-500"
+                                          disabled={
+                                            removeItem.isPending || !item.id
+                                          }
+                                          className={`font-medium ${
+                                            removeItem.isPending || !item.id
+                                              ? "text-gray-400"
+                                              : "text-indigo-600 hover:text-indigo-500"
+                                          }`}
+                                          onClick={() =>
+                                            item.id &&
+                                            removeItem.mutate({
+                                              lineItemId: item.id,
+                                            })
+                                          }
                                         >
-                                          Remove
+                                          {removeItem.isPending
+                                            ? "Removing..."
+                                            : "Remove"}
                                         </button>
                                       </div>
                                     </div>

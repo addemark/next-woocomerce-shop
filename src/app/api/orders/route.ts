@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createOrder, fetchOrderById, Order } from "@/lib/woo-api/orders";
+import { da } from "zod/v4/locales";
 
 export async function GET(request: NextRequest) {
   try {
     const orderIdCookie = request.cookies.get("orderId")?.value;
     if (!orderIdCookie) {
-      return NextResponse.json(
-        { error: "No orderId cookie found" },
-        { status: 400 }
-      );
+      return NextResponse.json({ data: {} }, { status: 200 });
     }
 
     if (orderIdCookie) {
       const existingOrder = await fetchOrderById(Number(orderIdCookie));
       if (existingOrder) {
-        console.log("order", existingOrder.line_items);
         return NextResponse.json({ data: existingOrder }, { status: 200 });
       }
     }

@@ -4,6 +4,7 @@ import CartDrawer from "@/components/shop/cart/drawerCart";
 import {
   Fragment,
   createContext,
+  use,
   useContext,
   useEffect,
   useState,
@@ -36,6 +37,7 @@ import {
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
+import { fetchCurrentOrder } from "@/lib/orders-client";
 
 type NavigationItem = {
   name: string;
@@ -79,6 +81,8 @@ const HomeMenuContext = createContext<{
   setUser: (user: User | null) => void;
   userLoading: boolean;
   userError: unknown;
+  totalItems?: number;
+  setTotalItems?: (count: number) => void;
 } | null>(null);
 
 type HomeMenuProps = {
@@ -99,6 +103,7 @@ function HomeMenu({ children }: { children: React.ReactNode }) {
   const [navigation, setNavigation] = useState<Navigation>(baseNavigation);
   const [user, setUser] = useState<User | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
+  const [totalItems, setTotalItems] = useState<number | undefined>(0);
 
   const fetchBrands = async () => {
     const response = await fetch("/api/brands");
@@ -187,6 +192,8 @@ function HomeMenu({ children }: { children: React.ReactNode }) {
         userError,
         cartOpen,
         setCartOpen,
+        totalItems,
+        setTotalItems,
       }}
     >
       {children}
@@ -412,8 +419,35 @@ HomeMenu.Desktop = function DesktopNavigation() {
 
 // Navigation Header Subcomponent
 HomeMenu.Header = function NavigationHeader() {
-  const { setMobileMenuOpen, user, setUser, userLoading, setCartOpen } =
-    useHomeMenu();
+  const {
+    setMobileMenuOpen,
+    user,
+    setUser,
+    userLoading,
+    setCartOpen,
+    totalItems,
+    setTotalItems,
+  } = useHomeMenu();
+  const {
+    data: currentOrder,
+    isLoading: orderLoading,
+    isError: orderError,
+  } = useQuery({
+    queryKey: ["order", "current"],
+    queryFn: fetchCurrentOrder,
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 30, // 30 seconds is enough for header badge
+  });
+  useEffect(() => {
+    const itemsIncart =
+      orderError || !currentOrder
+        ? 0
+        : (currentOrder.line_items ?? []).reduce(
+            (sum, item) => sum + Number(item.quantity || 0),
+            0
+          );
+    setTotalItems?.(itemsIncart);
+  }, [currentOrder]);
 
   const signoutMutation = useMutation({
     mutationFn: async () => {
@@ -593,7 +627,7 @@ HomeMenu.Header = function NavigationHeader() {
                           className="size-6 shrink-0 text-white"
                         />
                         <span className="ml-2 text-sm font-medium text-white">
-                          0
+                          {orderLoading ? "..." : totalItems}
                         </span>
                         <span className="sr-only">items in cart, view bag</span>
                       </a>
