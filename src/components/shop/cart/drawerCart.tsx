@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useHomeMenu } from "@/components/menu/homeMenu";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogBackdrop,
@@ -10,47 +10,58 @@ import {
 } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-const products = [
-  {
-    id: 1,
-    name: "Throwback Hip Bag",
-    href: "#",
-    color: "Salmon",
-    price: "$90.00",
-    quantity: 1,
-    imageSrc:
-      "https://tailwindcss.com/plus-assets/img/ecommerce-images/shopping-cart-page-04-product-01.jpg",
-    imageAlt:
-      "Salmon orange fabric pouch with match zipper, gray zipper pull, and adjustable hip belt.",
-  },
-  {
-    id: 2,
-    name: "Medium Stuff Satchel",
-    href: "#",
-    color: "Blue",
-    price: "$32.00",
-    quantity: 1,
-    imageSrc:
-      "https://tailwindcss.com/plus-assets/img/ecommerce-images/shopping-cart-page-04-product-02.jpg",
-    imageAlt:
-      "Front of satchel with blue canvas body, black straps and handle, drawstring top, and front zipper pouch.",
-  },
-  {
-    id: 3,
-    name: "Zip Tote Basket",
-    href: "#",
-    color: "White and black",
-    price: "$140.00",
-    quantity: 1,
-    imageSrc:
-      "https://tailwindcss.com/plus-assets/img/ecommerce-images/shopping-cart-page-04-product-03.jpg",
-    imageAlt:
-      "Front of zip tote bag with white canvas, black canvas straps and handle, and black zipper pulls.",
-  },
-];
+import type { Order } from "@/lib/woo-api/orders";
+
+type OrderResponse = { data: Order };
+
+const fetchCurrentOrder = async (): Promise<Order> => {
+  const response = await fetch("/api/orders");
+  if (!response.ok) {
+    throw new Error(`Failed to fetch order (${response.statusText})`);
+  }
+  const payload: OrderResponse = await response.json();
+  if (!payload?.data) {
+    throw new Error("Order response missing data");
+  }
+  return payload.data;
+};
+
+const formatCurrency = (value: number, currency?: string) => {
+  const code = currency || "RON";
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: code,
+    }).format(value);
+  } catch {
+    const fixed = Number.isFinite(value) ? value.toFixed(2) : "0.00";
+    return `${fixed} ${code}`;
+  }
+};
 
 export default function CartDrawer() {
   const { cartOpen, setCartOpen } = useHomeMenu();
+  const {
+    data: order,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+  } = useQuery<Order, Error>({
+    queryKey: ["order", "current"],
+    queryFn: fetchCurrentOrder,
+    enabled: cartOpen,
+    refetchOnWindowFocus: false,
+  });
+
+  const lineItems = order?.line_items ?? [];
+  const currency = order?.currency;
+  const subtotalValue = lineItems.reduce((sum, item) => {
+    const lineTotal = Number(item.total ?? item.subtotal ?? 0);
+    return sum + (Number.isFinite(lineTotal) ? lineTotal : 0);
+  }, 0);
+  const subtotalLabel = formatCurrency(subtotalValue, currency);
+
   return (
     <div>
       <Dialog open={cartOpen} onClose={setCartOpen} className="relative z-10">
@@ -72,6 +83,11 @@ export default function CartDrawer() {
                       <DialogTitle className="text-lg font-medium text-gray-900">
                         Shopping cart
                       </DialogTitle>
+                      {isFetching && order && (
+                        <span className="text-xs text-gray-500">
+                          Updating...
+                        </span>
+                      )}
                       <div className="ml-3 flex h-7 items-center">
                         <button
                           type="button"
@@ -91,45 +107,85 @@ export default function CartDrawer() {
                           role="list"
                           className="-my-6 divide-y divide-gray-200"
                         >
-                          {products.map((product) => (
-                            <li key={product.id} className="flex py-6">
-                              <div className="size-24 shrink-0 overflow-hidden rounded-md border border-gray-200">
-                                <img
-                                  alt={product.imageAlt}
-                                  src={product.imageSrc}
-                                  className="size-full object-cover"
-                                />
-                              </div>
-
-                              <div className="ml-4 flex flex-1 flex-col">
-                                <div>
-                                  <div className="flex justify-between text-base font-medium text-gray-900">
-                                    <h3>
-                                      <a href={product.href}>{product.name}</a>
-                                    </h3>
-                                    <p className="ml-4">{product.price}</p>
-                                  </div>
-                                  <p className="mt-1 text-sm text-gray-500">
-                                    {product.color}
-                                  </p>
-                                </div>
-                                <div className="flex flex-1 items-end justify-between text-sm">
-                                  <p className="text-gray-500">
-                                    Qty {product.quantity}
-                                  </p>
-
-                                  <div className="flex">
-                                    <button
-                                      type="button"
-                                      className="font-medium text-indigo-600 hover:text-indigo-500"
-                                    >
-                                      Remove
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
+                          {isLoading && (
+                            <li className="py-6 text-sm text-gray-500">
+                              Loading cart...
                             </li>
-                          ))}
+                          )}
+
+                          {isError && (
+                            <li className="py-6 text-sm text-red-600">
+                              {error?.message ?? "Failed to load cart items."}
+                            </li>
+                          )}
+
+                          {!isLoading && !isError && lineItems.length === 0 && (
+                            <li className="py-6 text-sm text-gray-500">
+                              Your cart is empty.
+                            </li>
+                          )}
+
+                          {!isLoading &&
+                            !isError &&
+                            lineItems.map((item) => {
+                              const priceLabel = formatCurrency(
+                                Number(item.total ?? item.subtotal ?? 0),
+                                currency
+                              );
+                              const quantity = Number(item.quantity ?? 0);
+                              const key =
+                                item.id ??
+                                `${item.product_id}-${item.variation_id ?? "base"}`;
+
+                              return (
+                                <li key={key} className="flex py-6">
+                                  <div className="size-24 shrink-0 overflow-hidden rounded-md border border-gray-200">
+                                    <div className="flex size-full items-center justify-center bg-gray-50 text-sm font-medium text-gray-400">
+                                      {!item.image ? (
+                                        (item.name?.charAt(0) ?? "?")
+                                      ) : (
+                                        <img
+                                          src={item.image?.src ?? ""}
+                                          alt={item.image?.alt ?? ""}
+                                          className="size-full object-cover"
+                                        />
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div className="ml-4 flex flex-1 flex-col">
+                                    <div>
+                                      <div className="flex justify-between text-base font-medium text-gray-900">
+                                        <h3>
+                                          {item.name ??
+                                            `Product #${item.product_id}`}
+                                        </h3>
+                                        <p className="ml-4">{priceLabel}</p>
+                                      </div>
+                                      {item.sku && (
+                                        <p className="mt-1 text-sm text-gray-500">
+                                          SKU {item.sku}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className="flex flex-1 items-end justify-between text-sm">
+                                      <p className="text-gray-500">
+                                        Qty {quantity}
+                                      </p>
+
+                                      <div className="flex">
+                                        <button
+                                          type="button"
+                                          className="font-medium text-indigo-600 hover:text-indigo-500"
+                                        >
+                                          Remove
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </li>
+                              );
+                            })}
                         </ul>
                       </div>
                     </div>
@@ -138,7 +194,7 @@ export default function CartDrawer() {
                   <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
                     <div className="flex justify-between text-base font-medium text-gray-900">
                       <p>Subtotal</p>
-                      <p>$262.00</p>
+                      <p>{subtotalLabel}</p>
                     </div>
                     <p className="mt-0.5 text-sm text-gray-500">
                       Shipping and taxes calculated at checkout.

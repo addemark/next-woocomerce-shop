@@ -38,6 +38,10 @@ export type Order = {
     subtotal?: string;
     total?: string;
     sku?: string;
+    image?: {
+      src: string;
+      alt: string;
+    };
   }[];
 };
 
@@ -99,7 +103,6 @@ export async function updateOrder(
   try {
     const response = await wc.put(`orders/${id}`, orderData);
     const order: Order = response.data;
-    console.log("[****orders*****]", orderData);
 
     return order;
   } catch (error: any) {

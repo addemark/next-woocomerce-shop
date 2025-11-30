@@ -4,24 +4,20 @@ import { createOrder, fetchOrderById, Order } from "@/lib/woo-api/orders";
 export async function GET(request: NextRequest) {
   try {
     const orderIdCookie = request.cookies.get("orderId")?.value;
+    if (!orderIdCookie) {
+      return NextResponse.json(
+        { error: "No orderId cookie found" },
+        { status: 400 }
+      );
+    }
 
     if (orderIdCookie) {
       const existingOrder = await fetchOrderById(Number(orderIdCookie));
       if (existingOrder) {
+        console.log("order", existingOrder.line_items);
         return NextResponse.json({ data: existingOrder }, { status: 200 });
       }
     }
-
-    const newOrder = await createOrder({ status: "pending" });
-    if (!newOrder) {
-      return NextResponse.json(
-        { error: "Failed to create order" },
-        { status: 500 }
-      );
-    }
-    const response = NextResponse.json({ data: newOrder }, { status: 201 });
-    response.cookies.set("orderId", newOrder.id.toString());
-    return response;
   } catch (error: any) {
     console.error("Error ensuring order:", error);
     return NextResponse.json(
