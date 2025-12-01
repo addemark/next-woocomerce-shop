@@ -27,7 +27,7 @@ const formatCurrency = (value: number, currency?: string) => {
 };
 
 export default function CartDrawer() {
-  const { cartOpen, setCartOpen, setTotalItems } = useHomeMenu();
+  const { cartOpen, setCartOpen } = useHomeMenu();
   const queryClient = useQueryClient();
   const {
     data: order,
@@ -41,17 +41,6 @@ export default function CartDrawer() {
     enabled: cartOpen,
     refetchOnWindowFocus: false,
   });
-
-  useEffect(() => {
-    if (setTotalItems) {
-      const itemsCount =
-        order?.line_items?.reduce(
-          (sum, item) => sum + Number(item.quantity || 0),
-          0
-        ) ?? 0;
-      setTotalItems(itemsCount);
-    }
-  }, [order, setTotalItems]);
 
   const removeItem = useMutation<Order, Error, { lineItemId: number }>({
     mutationFn: async ({ lineItemId }) => {

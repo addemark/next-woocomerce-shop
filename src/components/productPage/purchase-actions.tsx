@@ -2,7 +2,7 @@
 
 import { Button } from "@headlessui/react";
 import { HeartIcon } from "@heroicons/react/24/outline";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 type PurchaseActionsProps = {
   disabled?: boolean;
@@ -19,6 +19,7 @@ export function PurchaseActions({
   quantity = 1,
   onOrderReady,
 }: PurchaseActionsProps) {
+  const queryClient = useQueryClient();
   const addToOrder = useMutation<
     { data: { id: number }; totalItems?: number },
     Error
@@ -46,6 +47,7 @@ export function PurchaseActions({
       if (orderId) {
         onOrderReady?.(orderId);
       }
+      queryClient.invalidateQueries({ queryKey: ["order", "current"] });
     },
   });
 
